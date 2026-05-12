@@ -3,4 +3,10 @@ AI disclaimer: frontend is vibe coded. ~~BUT backend does not use AI-generated c
 
 this is mvp, sorry for ai... :(
 
-after all works i will do big code refactoring
+Once everything is working properly, I plan to do a full code refactor.
+
+# So, how to run
+
+Place the `bin` and `naive` files in any directory and run it...
+
+On the first launch, it will automatically generate a `config.yaml` file, change it)
