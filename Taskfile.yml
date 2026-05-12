@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: "3"
+
+tasks:
+  build_frontend:
+    desc: build frontend
+    dir: "./frontend"
+    cmds:
+      - npm run build
+
+  build_backend:
+    desc: build backend
+    dir: "./backend"
+    deps: [build_frontend]
+    cmds:
+      - go build -o "../build/"
+
+  build_run:
+    desc: build_all and run it
+    aliases: [default]
+    deps: [build_backend]
+    dir: build
+    cmds:
+      - ./rachav
