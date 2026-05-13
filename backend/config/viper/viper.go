@@ -7,6 +7,16 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	defaultLogin          = "user"
+	defaultPassword       = "ChangeThisPasswordPlease"
+	enablePanel           = false
+	defaultListenPort     = 443
+	defaultNaiveProxyPort = 8080
+	defaultFallbackPort   = 8081
+	defaultHost           = "localhost"
+)
+
 type ViperConfig struct{}
 
 func (vp ViperConfig) Init() {
@@ -16,19 +26,25 @@ func (vp ViperConfig) Init() {
 
 	err := viper.ReadInConfig()
 	if err == nil {
+		slog.Any("config file", slog.String("path", viper.ConfigFileUsed()))
+
 		return
 	}
 
-	viper.SetDefault("login", "user")
-	viper.SetDefault("password", "ChangeThisPasswordPlease")
-	viper.SetDefault("Enable_panel", false)
-	viper.SetDefault("panel_url", rand.Text())
-	viper.SetDefault("listen_port", 443)
-	viper.SetDefault("naiveproxy_port", 8080)
-	viper.SetDefault("fallback_port", 8081)
-	viper.SetDefault("host", "localhost")
+	slog.Warn("can't read config...")
 
-	slog.Info("creating example config... Change it as fast as you can)")
+	defaultPanelUrl := rand.Text()
+
+	viper.SetDefault("login", defaultLogin)
+	viper.SetDefault("password", defaultPassword)
+	viper.SetDefault("enable_panel", enablePanel)
+	viper.SetDefault("panel_url", defaultPanelUrl)
+	viper.SetDefault("listen_port", defaultListenPort)
+	viper.SetDefault("naiveproxy_port", defaultNaiveProxyPort)
+	viper.SetDefault("fallback_port", defaultFallbackPort)
+	viper.SetDefault("host", defaultHost)
+
+	slog.Warn("creating example config... Change it as fast as you can :)")
 
 	err = viper.SafeWriteConfigAs("config.yaml")
 	if err != nil {

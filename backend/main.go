@@ -1,24 +1,31 @@
 package main
 
 import (
+	"context"
 	"crypto/subtle"
 	"embed"
-	"fmt"
 	"io/fs"
 	"log/slog"
 	"net/http"
 	"os/exec"
+	"strconv"
 	"time"
 
 	"github.com/kopkapozla/rachav/config"
 	"github.com/kopkapozla/rachav/config/viper"
 	"github.com/kopkapozla/rachav/database"
-	"github.com/kopkapozla/rachav/handlers"
-	"github.com/kopkapozla/rachav/proxy_handler"
+	"github.com/kopkapozla/rachav/handlers/panel"
+	proxy_handler "github.com/kopkapozla/rachav/handlers/proxy"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/net/http2"
+)
+
+const (
+	IdleTimeout          = 5 * time.Minute
+	MaxConcurrentStreams = 1000
+	TLSHandshakeTimeout  = 5 * time.Minute
 )
 
 //go:embed build_frontend
@@ -34,76 +41,92 @@ func main() {
 	config.Config.Init()
 
 	go func() {
-		cmd := exec.Command("./naive", "--listen=http://127.0.0.1:"+config.Config.GetNaivePort())
-		err := cmd.Run()
+		_, err := strconv.Atoi(config.Config.GetNaivePort())
 		if err != nil {
-			fmt.Println("error:", err)
+			panic("strange port value, try to trim it")
+		}
+
+		// https://github.com/seriousStranger/rachav/issues/1
+		//nolint:gosec
+		cmd := exec.CommandContext(
+			context.Background(),
+			"./naive",
+			"--listen=http://127.0.0.1:"+config.Config.GetNaivePort(),
+		)
+
+		err = cmd.Run()
+		if err != nil {
+			slog.Error(err.Error())
 			panic(err)
 		}
 	}()
 
-	m := &autocert.Manager{
+	certmanager := &autocert.Manager{
 		Cache:      autocert.DirCache("./certs"),
 		Prompt:     autocert.AcceptTOS,
 		HostPolicy: autocert.HostWhitelist(config.Config.GetHost()),
 	}
 
-	tr := &http.Transport{
-		IdleConnTimeout:     30 * time.Second,
-		TLSHandshakeTimeout: 10 * time.Second,
+	transport := &http.Transport{
+		IdleConnTimeout:     IdleTimeout,
+		TLSHandshakeTimeout: TLSHandshakeTimeout,
 		WriteBufferSize:     0,
 		ReadBufferSize:      0,
 	}
-	tr.Protocols = new(http.Protocols)
-	tr.Protocols.SetHTTP1(true)
-	tr.Protocols.SetUnencryptedHTTP2(true)
+	transport.Protocols = new(http.Protocols)
+	transport.Protocols.SetHTTP1(true)
+	transport.Protocols.SetUnencryptedHTTP2(true)
 
-	echoServer := echo.New()
+	var echoServer *echo.Echo
+
 	if config.Config.IsPanelEnable() {
 		slog.Warn("panel enable")
 
-		panel := echoServer.Group("/" + config.Config.GetPanelUrl())
+		echoServer = echo.New()
 
-		panel.GET("/", getPanelHtml(panelFile))
+		echoServer.GET("/", getPanelHtml(panelFile))
 
-		api := panel.Group("/api")
+		api := echoServer.Group("/api")
 		api.Use(middleware.BasicAuth(authForApi))
 
-		api.GET("/user-list", handlers.GetUserList)
-		api.POST("/user-list", handlers.PostUserList)
+		api.GET("/user-list", panel.GetUserList)
+		api.POST("/user-list", panel.PostUserList)
 	}
 
 	handler := http.HandlerFunc(
 		proxy_handler.GetProxyHandler(
-			tr,
+			transport,
 			"127.0.0.1:"+config.Config.GetNaivePort(),
 			"127.0.0.1:"+config.Config.GetFallbackPort(),
 			echoServer,
 		),
 	)
 
-	srv := &http.Server{
+	server := &http.Server{
 		Addr:         ":" + config.Config.GetListenPort(),
 		Handler:      handler,
 		ReadTimeout:  0,
 		WriteTimeout: 0,
-		IdleTimeout:  10 * time.Minute,
-		TLSConfig:    m.TLSConfig(),
+		IdleTimeout:  IdleTimeout,
+		TLSConfig:    certmanager.TLSConfig(),
 	}
 
-	srv.Protocols = new(http.Protocols)
-	srv.Protocols.SetHTTP1(true)
-	srv.Protocols.SetHTTP2(true)
+	server.Protocols = new(http.Protocols)
+	server.Protocols.SetHTTP1(true)
+	server.Protocols.SetHTTP2(true)
 
-	h2s := &http2.Server{
-		MaxConcurrentStreams: 1000,
-		IdleTimeout:          5 * time.Minute,
+	http2server := &http2.Server{
+		MaxConcurrentStreams: MaxConcurrentStreams,
+		IdleTimeout:          IdleTimeout,
 	}
 
-	http2.ConfigureServer(srv, h2s)
+	err = http2.ConfigureServer(server, http2server)
+	if err != nil {
+		panic(err)
+	}
 
 	slog.Info("racahv on " + config.Config.GetHost() + ":" + config.Config.GetListenPort())
-	slog.Error(srv.ListenAndServeTLS("", "").Error())
+	slog.Error(server.ListenAndServeTLS("", "").Error())
 }
 
 func authForApi(c *echo.Context, user string, password string) (bool, error) {
@@ -112,8 +135,10 @@ func authForApi(c *echo.Context, user string, password string) (bool, error) {
 		subtle.ConstantTimeCompare([]byte(password), []byte(curPass)) == 1 {
 		return true, nil
 	}
+
 	slog.Warn(user + ":" + password)
 	slog.Warn(curUser + ":" + curPass)
+
 	return false, nil
 }
 
@@ -121,9 +146,16 @@ func getPanelHtml(files fs.FS) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		html, err := fs.ReadFile(files, "build_frontend/index.html")
 		if err != nil {
-			return echo.NewHTTPError(500, "something went wrong: "+err.Error())
+			slog.Error(
+				"Can't read index.html. In base configuration it's embed, so in 99% time it's code problem",
+			)
+
+			return echo.NewHTTPError(
+				http.StatusInternalServerError,
+				"something is broken: "+err.Error(),
+			)
 		}
 
-		return c.HTMLBlob(200, html)
+		return c.HTMLBlob(http.StatusOK, html)
 	}
 }

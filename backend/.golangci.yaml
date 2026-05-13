@@ -1,0 +1,64 @@
+version: "2"
+linters:
+  default: all
+
+  disable:
+    - depguard
+    - exhaustruct
+    - wsl
+    - ireturn
+    - funcorder
+    - interfacebloat
+
+  settings:
+    wrapcheck:
+      ignore-sigs:
+        - func (*github.com/labstack/echo/v5.Context).JSON(code int, i any) (err error)
+        - func (*github.com/labstack/echo/v5.Context).NoContent(code int) error
+        - fmt.Errorf
+    tagliatelle:
+      case:
+        rules:
+          json: camel
+          yaml: snake
+          env: upperSnake
+    revive:
+      rules:
+        - name: exported
+          severity: warning
+          disabled: true
+    varnamelen:
+      ignore-names:
+        - err
+        - ok
+        - db
+        - wg
+        - mu
+        - rw
+        - id
+        - ch
+        - fn
+        - ctx
+        - req
+        - res
+        - cfg
+        - msg
+        - buf
+        - env
+        - log
+        - dst
+        - src
+        - ip
+        - fs
+        - r
+        - w
+        - c
+
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+    - golines
+    - swaggo
