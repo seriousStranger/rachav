@@ -9,11 +9,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # builds
-dist
-dist-ssr
-backend/docs/_build/
+
 build
-backend/build_frontend
+backend/build_frontend/*
+!.keep
 
 # virtual environment, chaches and other
 node_modules

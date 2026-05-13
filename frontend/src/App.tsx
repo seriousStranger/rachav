@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { RiLockLine, RiLoginBoxLine, RiLogoutBoxLine } from "@remixicon/react"
 import { UserList } from "./components/UserList"
-import { fetchUsers, saveUsers, testCredentials } from "./services/api"
+import { fetchUsers, saveUsers, testCredentials, fetchHost } from "./services/api"
 
 type AuthState = {
   username: string
@@ -27,6 +27,7 @@ function App() {
   })
   
   const [users, setUsers] = useState<Record<string, string>>({})
+  const [host, setHost] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const [loginError, setLoginError] = useState("")
 
@@ -43,6 +44,8 @@ function App() {
         
         const userList = await fetchUsers(username, password)
         setUsers(userList)
+        const fetchedHost = await fetchHost(username, password)
+        setHost(fetchedHost)
       } else {
         setLoginError("Invalid username or password")
       }
@@ -65,6 +68,7 @@ function App() {
     setAuth({ username: "", password: "", isAuthenticated: false })
     localStorage.removeItem("rachav_auth")
     setUsers({})
+    setHost("")
   }
 
   const handleUsersChange = async (updatedUsers: Record<string, string>): Promise<boolean> => {
@@ -87,7 +91,7 @@ function App() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-primary rounded-lg flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-primary flex items-center justify-center mb-4">
               <RiLockLine className="h-8 w-8 text-primary-foreground" />
             </div>
             <CardTitle className="text-2xl">Rachav Dashboard</CardTitle>
@@ -104,7 +108,7 @@ function App() {
               handleLogin(username, password)
             }} className="space-y-4">
               {loginError && (
-                <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm">
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 text-sm">
                   {loginError}
                 </div>
               )}
@@ -137,10 +141,6 @@ function App() {
                 {loading ? "Signing in..." : "Sign In"}
               </Button>
               
-              <div className="pt-4 border-t text-center text-sm text-muted-foreground">
-                <p><strong>Default credentials:</strong> user / password</p>
-                <p className="text-xs mt-1">Credentials are configured in the backend config.yaml file</p>
-              </div>
             </form>
           </CardContent>
         </Card>
@@ -169,11 +169,11 @@ function App() {
           <CardHeader>
             <CardTitle>User List</CardTitle>
             <CardDescription>
-              Manage basic authentication users
+              Manage users for basic authentication
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <UserList users={users} onUsersChange={handleUsersChange} />
+            <UserList users={users} onUsersChange={handleUsersChange} host={host} />
           </CardContent>
         </Card>
       </main>

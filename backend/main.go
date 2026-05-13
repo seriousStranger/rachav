@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/subtle"
 	"embed"
 	"io/fs"
 	"log/slog"
@@ -11,13 +10,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kopkapozla/rachav/auth"
 	"github.com/kopkapozla/rachav/config"
 	"github.com/kopkapozla/rachav/config/viper"
 	"github.com/kopkapozla/rachav/database"
 	"github.com/kopkapozla/rachav/handlers/panel"
 	proxy_handler "github.com/kopkapozla/rachav/handlers/proxy"
 	"github.com/labstack/echo/v5"
-	"github.com/labstack/echo/v5/middleware"
 	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/net/http2"
 )
@@ -87,10 +86,11 @@ func main() {
 		echoServer.GET("/", getPanelHtml(panelFile))
 
 		api := echoServer.Group("/api")
-		api.Use(middleware.BasicAuth(authForApi))
+		api.Use(auth.EchoMiddleware)
 
 		api.GET("/user-list", panel.GetUserList)
 		api.POST("/user-list", panel.PostUserList)
+		api.GET("/host", panel.GetHost)
 	}
 
 	handler := http.HandlerFunc(
@@ -127,19 +127,6 @@ func main() {
 
 	slog.Info("racahv on " + config.Config.GetHost() + ":" + config.Config.GetListenPort())
 	slog.Error(server.ListenAndServeTLS("", "").Error())
-}
-
-func authForApi(c *echo.Context, user string, password string) (bool, error) {
-	curUser, curPass := config.Config.GetAuthPair()
-	if subtle.ConstantTimeCompare([]byte(user), []byte(curUser)) == 1 &&
-		subtle.ConstantTimeCompare([]byte(password), []byte(curPass)) == 1 {
-		return true, nil
-	}
-
-	slog.Warn(user + ":" + password)
-	slog.Warn(curUser + ":" + curPass)
-
-	return false, nil
 }
 
 func getPanelHtml(files fs.FS) echo.HandlerFunc {

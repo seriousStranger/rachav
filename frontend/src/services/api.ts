@@ -28,7 +28,7 @@ export const testCredentials = async (
 ): Promise<boolean> => {
   const response = await fetch(`${API_BASE}/user-list`, {
     headers: {
-      Authorization: getAuthHeader(username, password),
+      "Api-Authorization": getAuthHeader(username, password),
     },
   })
   return response.ok
@@ -40,7 +40,7 @@ export const fetchUsers = async (
 ): Promise<Record<string, string>> => {
   const response = await fetch(`${API_BASE}/user-list`, {
     headers: {
-      Authorization: getAuthHeader(username, password),
+      "Api-Authorization": getAuthHeader(username, password),
     },
   })
   if (!response.ok) {
@@ -48,6 +48,23 @@ export const fetchUsers = async (
     throw new Error(`HTTP ${response.status}: ${errorText}`)
   }
   return response.json()
+}
+
+export const fetchHost = async (
+  username: string,
+  password: string
+): Promise<string> => {
+  const response = await fetch(`${API_BASE}/host`, {
+    headers: {
+      "Api-Authorization": getAuthHeader(username, password),
+    },
+  })
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`HTTP ${response.status}: ${errorText}`)
+  }
+  const data = await response.json()
+  return data.host
 }
 
 export const saveUsers = async (
@@ -60,7 +77,7 @@ export const saveUsers = async (
     const response = await fetch(`${API_BASE}/user-list`, {
       method: "POST",
       headers: {
-        Authorization: authHeader,
+        "Api-Authorization": authHeader,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(users),

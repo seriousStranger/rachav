@@ -3,11 +3,13 @@ import type { ChangeEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { RiEditLine, RiDeleteBinLine, RiSaveLine, RiCloseLine, RiUserLine, RiKey2Line } from "@remixicon/react"
+import { RiEditLine, RiDeleteBinLine, RiSaveLine, RiCloseLine, RiUserLine, RiKey2Line, RiFileCopyLine, RiQrCodeLine } from "@remixicon/react"
+import { QRCodePopup } from "./QRCodePopup"
 
 interface UserListProps {
   users: Record<string, string>
   onUsersChange: (users: Record<string, string>) => Promise<boolean>
+  host: string
 }
 
 function generatePassword(length: number = 12): string {
@@ -20,11 +22,33 @@ function generatePassword(length: number = 12): string {
   return password
 }
 
-export function UserList({ users, onUsersChange }: UserListProps) {
+export function UserList({ users, onUsersChange, host }: UserListProps) {
   const [editingUser, setEditingUser] = useState<string | null>(null)
   const [newPassword, setNewPassword] = useState("")
   const [newUsername, setNewUsername] = useState("")
   const [newUserPassword, setNewUserPassword] = useState("")
+  const [qrLink, setQrLink] = useState<string | null>(null)
+
+  function generateNaiveLink(username: string, password: string): string {
+    return `naive+https://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${host}:443`
+  }
+
+  async function copyToClipboard(text: string) {
+    try {
+      await navigator.clipboard.writeText(text)
+      alert('Copied to clipboard!')
+    } catch (err) {
+      console.error('Failed to copy:', err)
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      alert('Copied to clipboard!')
+    }
+  }
 
   const handleDelete = async (username: string) => {
     if (!confirm(`Are you sure you want to delete user "${username}"?`)) {
@@ -91,7 +115,7 @@ export function UserList({ users, onUsersChange }: UserListProps) {
   return (
     <div className="space-y-6">
       {/* Add User Form */}
-      <div className="border rounded-lg p-4">
+      <div className="border p-4">
         <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
           <RiUserLine className="h-5 w-5" />
           Add New User
@@ -133,7 +157,7 @@ export function UserList({ users, onUsersChange }: UserListProps) {
       <div>
         <h3 className="text-lg font-medium mb-4">User List ({userEntries.length} total)</h3>
         {userEntries.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
+          <div className="text-center py-12 border-2 border-dashed border-border">
             <div className="mx-auto w-12 h-12 text-muted-foreground mb-4">
               <RiUserLine className="w-full h-full" />
             </div>
@@ -141,12 +165,13 @@ export function UserList({ users, onUsersChange }: UserListProps) {
             <p className="text-muted-foreground">Add users using the form above.</p>
           </div>
         ) : (
-          <div className="rounded-md border">
+          <div className="border">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Username</TableHead>
                   <TableHead>Password</TableHead>
+                  <TableHead>NaiveProxy Link</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -177,6 +202,33 @@ export function UserList({ users, onUsersChange }: UserListProps) {
                       ) : (
                         <span className="font-mono break-all">{password}</span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 max-w-md">
+                        <code className="text-xs font-mono break-all flex-1 min-w-0">
+                          {generateNaiveLink(username, password)}
+                        </code>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0 h-7 w-7 p-0"
+                          onClick={() => copyToClipboard(generateNaiveLink(username, password))}
+                          title="Copy link"
+                        >
+                          <RiFileCopyLine className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0 h-7 w-7 p-0"
+                          onClick={() => setQrLink(generateNaiveLink(username, password))}
+                          title="Show QR code"
+                        >
+                          <RiQrCodeLine className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       {editingUser === username ? (
@@ -210,6 +262,7 @@ export function UserList({ users, onUsersChange }: UserListProps) {
           </div>
         )}
       </div>
+      {qrLink && <QRCodePopup link={qrLink} onClose={() => setQrLink(null)} />}
     </div>
   )
 }
