@@ -1,9 +1,9 @@
 <div align="center">
     <img src="/images/Rahab_by_Julius_Schnorr_von_Carolsfeld.png" alt="Rahab woodcut" width="320">   
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="./images/rachav-dark.png">
-      <source media="(prefers-color-scheme: light)" srcset="./images/rachav-light.png">
-      <img alt="Rachav logo" src="./images/rachav-light.png" width="420">
+      <source media="(prefers-color-scheme: dark)" srcset="images/rachav-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="images/rachav-light.svg">
+      <img alt="Rachav logo" src="images/rachav-light.svg" width="420">
     </picture>
     <br>
     <br>
