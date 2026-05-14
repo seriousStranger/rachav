@@ -1,6 +1,10 @@
 <div align="center">
     <img src="/images/Rahab_by_Julius_Schnorr_von_Carolsfeld.png" alt="Rahab woodcut" width="320">   
-    <img src="/images/rachav.svg" alt="Rachav logo" width="420">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="./images/rachav-dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="./images/rachav-light.png">
+      <img alt="Rachav logo" src="./images/rachav-light.png" width="420">
+    </picture>
     <br>
     <br>
 </div>
@@ -75,6 +79,8 @@ todo: create auto installation script
   }
 }}%%
 flowchart TD
+subgraph "how it work"
+direction TD
     request --> panelCheck[has panel prefix?]
     panelCheck -- "no (or panel disabled)" --> auth[proxy auth]
     panelCheck -- "yes" --> panel
@@ -89,4 +95,5 @@ flowchart TD
     panelIndex["[prefix]/"] --> panelApp["panel js app"]
     panelApp -- "user interface" --> uReadThis?["[prefix]/api/"]
     end
+end
 ```
