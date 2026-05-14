@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="141.18909mm"
+   height="27.306051mm"
+   viewBox="0 0 141.18909 27.306051"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
+   sodipodi:docname="rachav-orig.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.87750752"
+     inkscape:cx="318.51579"
+     inkscape:cy="86.608945"
+     inkscape:window-width="1472"
+     inkscape:window-height="923"
+     inkscape:window-x="0"
+     inkscape:window-y="33"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <rect
+       x="142.60693"
+       y="579.05658"
+       width="158.12541"
+       height="67.198036"
+       id="rect2" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-38.388406,-145.15413)">
+    <text
+       xml:space="preserve"
+       style="font-size:11.2889px;font-family:Sathu;-inkscape-font-specification:Sathu;text-align:start;letter-spacing:-0.291042px;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:start;fill:#000000;stroke-width:3.1745;stroke-opacity:0.989324"
+       x="40.627316"
+       y="162.12053"
+       id="text1"
+       transform="scale(1.0581677,0.94502976)"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.2889px;font-family:Lora;-inkscape-font-specification:Lora;text-align:start;letter-spacing:-0.291042px;baseline-shift:baseline;text-anchor:start;fill:#000000;stroke-width:3.1745"
+         x="40.627316"
+         y="162.12053"
+         dx="-4.9699993">Rachav</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text2"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.6667px;font-family:Lora;-inkscape-font-specification:Lora;text-align:start;letter-spacing:-1.1px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect2);fill:#000000;stroke-width:11.3386;stroke-opacity:0.989324" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.35px;font-family:Lora;-inkscape-font-specification:Lora;text-align:start;letter-spacing:-0.291042px;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:3;stroke-opacity:0.989324"
+       x="38.549282"
+       y="162.80183"
+       id="text3"><tspan
+         sodipodi:role="line"
+         style="font-size:6.35px;stroke-width:3"
+         x="38.549282"
+         y="162.80183"
+         id="tspan5">So she let them down by a rope through the window,</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:6.35px;stroke-width:3"
+         x="38.549282"
+         y="170.73933"
+         id="tspan7">for the house she lived in was part of the city wall.</tspan></text>
+  </g>
+</svg>
