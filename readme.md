@@ -9,7 +9,7 @@
     <br>
 </div>
 
-# rachav
+# Rachav
 easy naive proxy setup and dashboard
 
 It just helps you:
