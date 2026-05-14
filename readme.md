@@ -33,7 +33,7 @@ I don’t like AI-generated code, even though I use it sometimes. In the distant
 
 Place the `bin` and `naive` files in any directory and run it...
 
-On the first launch, it will automatically generate a `config.yaml` file, change it)
+On the first launch, it will automatically generate a `config.yaml` file, change it
 
 
 ## How it works
